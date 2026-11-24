@@ -1,30 +1,79 @@
-"""Copy the newspaper front page for 24 November 2026 to /output/entry.png.
+"""Publish the newspaper image for the 24 November 2026 news-image entry.
 
-The entry is a single pre-rendered image (entry.png, next to this script).
-This program only copies it into the output directory the judge reads.
-Standard library only; no network access is needed or used.
+The picture itself is produced elsewhere and stored next to this script as
+entry.png. All this program does is hand that file over to the grading
+sandbox: it reads the bytes, makes sure they really look like a JPEG of a
+sane size, and drops an identical copy at the output location the harness
+expects. Nothing here fetches anything from the network and nothing here
+draws or edits the picture.
 """
 
-import shutil
+import os
+import sys
 from pathlib import Path
 
-SOURCE = Path(__file__).resolve().parent / "entry.png"
-DEST_DIR = Path("/output")
-DEST = DEST_DIR / "entry.png"
+PICTURE_NAME = "entry.png"
+JPEG_OPENING = b"\xff\xd8\xff"
+LARGEST_ACCEPTED = 1_048_576
 
 
-def main() -> None:
-    DEST_DIR.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(SOURCE, DEST)
-    # Verify the copy landed intact before reporting success.
-    if DEST.stat().st_size != SOURCE.stat().st_size:
-        raise RuntimeError(f"copy incomplete: {DEST} is not {SOURCE.stat().st_size} bytes")
-    # The entry must be a JPEG under the name entry.png: fail loudly
-    # instead of handing the judge a corrupt or wrong-format file.
-    if DEST.read_bytes()[:3] != b"\xff\xd8\xff":
-        raise RuntimeError(f"{DEST} is not a JPEG (bad magic bytes)")
-    print(f"Copied {SOURCE} -> {DEST} ({DEST.stat().st_size} bytes)")
+def locate_picture() -> Path:
+    """Return the path of the image sitting beside this script."""
+    here = Path(__file__).resolve().parent
+    return here / PICTURE_NAME
+
+
+def pick_destination() -> Path:
+    """Return the output folder, honouring the harness variable when set."""
+    chosen = os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
+    return Path(chosen)
+
+
+def main() -> int:
+    picture = locate_picture()
+    if not picture.is_file():
+        print(f"missing picture: {picture}", file=sys.stderr)
+        return 1
+
+    picture_bytes = picture.read_bytes()
+    if len(picture_bytes) == 0:
+        print("picture is empty, refusing to publish it", file=sys.stderr)
+        return 1
+    if len(picture_bytes) > LARGEST_ACCEPTED:
+        print(
+            f"picture is {len(picture_bytes)} bytes, over the "
+            f"{LARGEST_ACCEPTED} byte limit",
+            file=sys.stderr,
+        )
+        return 1
+    if not picture_bytes.startswith(JPEG_OPENING):
+        print("picture does not begin with JPEG magic bytes", file=sys.stderr)
+        return 1
+
+    destination = pick_destination()
+    destination.mkdir(parents=True, exist_ok=True)
+    target = destination / PICTURE_NAME
+    target.write_bytes(picture_bytes)
+
+    written = target.stat().st_size
+    if written != len(picture_bytes):
+        print(
+            f"wrote {written} bytes but the picture has "
+            f"{len(picture_bytes)} bytes",
+            file=sys.stderr,
+        )
+        return 1
+
+    with target.open("rb") as handle:
+        opening = handle.read(len(JPEG_OPENING))
+    if opening != JPEG_OPENING:
+        print("the copied file does not begin with JPEG magic bytes",
+              file=sys.stderr)
+        return 1
+
+    print(f"published {PICTURE_NAME}: {written} bytes -> {target}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

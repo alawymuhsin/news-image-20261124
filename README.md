@@ -4,7 +4,12 @@
 [![rank](https://make.fun/badge/news-image-20261124/alawymuhsin/news-image-20261124/rank.svg)](https://make.fun/bounty/news-image-20261124/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261124)
 [![reward](https://make.fun/badge/news-image-20261124/alawymuhsin/news-image-20261124/reward.svg)](https://make.fun/bounty/news-image-20261124?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261124)
 
-A one-page newspaper front page summing up Tuesday 24 November 2026 in a single image: Jensen Huang returns as Nvidia chief and shares soar 31% in a record market rally, a Russian navy corvette is blown up at Benghazi port in Libya, a Chinese official is sentenced to death for leaking state secrets, an Oxfam report warns Gaza's soil and water are poisoned for decades, India and Nepal launch the Saryu-Kamala Express train link, and Carlos Alcaraz wins his first ATP Finals title.
+A newspaper front page summing up the world news of Tuesday 24 November
+2026. The lead story is Jensen Huang returning as Nvidia chief as its
+shares soar 31% in a record market rally, alongside a Russian navy corvette
+blown up at Benghazi port, a Chinese official sentenced to death for
+leaking secrets, an Oxfam report on Gaza's soil and water, a new
+India–Nepal train link, and Alcaraz winning his first ATP Finals title.
 
 ## Run it
 
@@ -12,7 +17,7 @@ A one-page newspaper front page summing up Tuesday 24 November 2026 in a single 
 python3 main.py
 ```
 
-This copies `entry.png` to `/output/entry.png`.
+The program copies entry.png to /output/entry.png.
 
 ---
 
